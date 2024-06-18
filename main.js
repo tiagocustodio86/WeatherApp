@@ -1,47 +1,41 @@
 function buscarPrevisao() {
-    const cidade = document.getElementById("cityInput").value;
-    const apiKey = document.getElementById("apiKeyInput").value;
-  
-    if (cidade === "") {
-      alert("Por favor, digite o nome da cidade!");
-      return;
-    }
-  
-    const urlAPI = `https://community-open-weather-map.p.rapidapi.com/weather?q=${cidade}`;
-    const options = {
-      method: "GET",
-      headers: {
-        "x-rapidapi-host": "community-open-weather-map.p.rapidapi.com",
-        "x-rapidapi-key": apiKey // Substitua por sua chave válida        
-      }      
-    };
-    console.log(options);
-    fetch(urlAPI, options)
-      .then(response => {
-        if (response.ok) {
-          response.json().then(data => {
-            const resultado = formatarResultado(data); // Função para formatar dados
-            document.getElementById("weather-result").innerHTML = resultado;
-          });
-        } else {
-          console.error("Erro na requisição:", response.status);
-          alert("Erro ao buscar dados da previsão do tempo.");
-        }
-      })
-      .catch(err => {
-        console.error("Erro:", err);
-        alert("Falha ao conectar com o serviço de previsão do tempo.");
-      });
-  }
-  
-  // Função para formatar dados da previsão do tempo (implemente de acordo com sua necessidade)
-  function formatarResultado(data) {
-    // Exemplo: retorne uma string com temperatura, descrição e data
-    const dataFormatada = new Date(data.dt * 1000);
-    return `
-      <h2>Previsão do Tempo para ${data.name}</h2>
-      <p>Temperatura: ${data.main.temp}°C - ${data.weather[0].description}</p>
-      <p>Data: ${dataFormatada.toLocaleDateString()}</p>
-    `;
-  }
-  
+    // Limpa o conteúdo atual do resultado
+    document.getElementById('weather-result').innerHTML = '';
+
+    // Obtém os valores inseridos pelo usuário
+    var cidade = document.getElementById('cityInput').value;
+    var apiKey = document.getElementById('apiKeyInput').value;
+
+    // URL da API OpenWeatherMap para buscar a previsão do tempo atual por cidade
+    var url = `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=${apiKey}&lang=pt_br&units=metric`;
+
+    // Faz a requisição GET para a API
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            // Verifica se a requisição foi bem-sucedida
+            if (data.cod === 200) {
+                // Formata os dados relevantes para exibição
+                var temperatura = data.main.temp;
+                var descricao = data.weather[0].description;
+                var cidadeNome = data.name;
+
+                // Cria o HTML para exibição do resultado
+                var resultadoHTML = `
+                    <h2>Previsão do Tempo para ${cidadeNome}</h2>
+                    <p><strong>Temperatura:</strong> ${temperatura} °C</p>
+                    <p><strong>Descrição:</strong> ${descricao}</p>
+                `;
+
+                // Insere o resultado no elemento weather-result
+                document.getElementById('weather-result').innerHTML = resultadoHTML;
+            } else {
+                // Exibe uma mensagem de erro se a cidade não for encontrada ou outro erro ocorrer
+                document.getElementById('weather-result').innerHTML = `<p>Erro: ${data.message}</p>`;
+            }
+        })
+        .catch(error => {
+            // Exibe uma mensagem de erro caso ocorra algum problema na requisição
+            document.getElementById('weather-result').innerHTML = `<p>Erro na requisição: ${error.message}</p>`;
+        });
+}
