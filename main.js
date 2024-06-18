@@ -11,7 +11,7 @@ function buscarPrevisao() {
       method: "GET",
       headers: {
         "x-rapidapi-host": "community-open-weather-map.p.rapidapi.com",
-        "x-rapidapi-key": "af76a06d440fda0208b27f511582cab6" // Substitua por sua chave válida
+        "x-rapidapi-key": "" // Substitua por sua chave válida
       }
     };
   
