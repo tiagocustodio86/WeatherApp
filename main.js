@@ -1,5 +1,6 @@
 function buscarPrevisao() {
     const cidade = document.getElementById("cityInput").value;
+    const apiKey = document.getElementById("apiKeyInput").value;
   
     if (cidade === "") {
       alert("Por favor, digite o nome da cidade!");
@@ -11,10 +12,10 @@ function buscarPrevisao() {
       method: "GET",
       headers: {
         "x-rapidapi-host": "community-open-weather-map.p.rapidapi.com",
-        "x-rapidapi-key": "" // Substitua por sua chave válida
-      }
+        "x-rapidapi-key": apiKey // Substitua por sua chave válida        
+      }      
     };
-  
+    console.log(options);
     fetch(urlAPI, options)
       .then(response => {
         if (response.ok) {
