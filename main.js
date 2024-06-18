@@ -6,29 +6,64 @@ function buscarPrevisao() {
     var cidade = document.getElementById('cityInput').value;
     var apiKey = document.getElementById('apiKeyInput').value;
 
-    // URL da API OpenWeatherMap para buscar a previsão do tempo atual por cidade
-    var url = `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=${apiKey}&lang=pt_br&units=metric`;
+    // URL da API OpenWeatherMap para buscar a previsão do tempo para os próximos 5 dias
+    var url = `https://api.openweathermap.org/data/2.5/forecast?q=${cidade}&appid=${apiKey}&lang=pt_br&units=metric`;
 
     // Faz a requisição GET para a API
     fetch(url)
         .then(response => response.json())
         .then(data => {
             // Verifica se a requisição foi bem-sucedida
-            if (data.cod === 200) {
-                // Formata os dados relevantes para exibição
-                var temperatura = data.main.temp;
-                var descricao = data.weather[0].description;
-                var cidadeNome = data.name;
+            if (data.cod === '200') {
+                // Filtra os dados para obter a previsão para os próximos 5 dias
+                var previsoes = data.list;
 
-                // Cria o HTML para exibição do resultado
-                var resultadoHTML = `
-                    <h2>Previsão do Tempo para ${cidadeNome}</h2>
-                    <p><strong>Temperatura:</strong> ${temperatura} °C</p>
-                    <p><strong>Descrição:</strong> ${descricao}</p>
-                `;
+                // Cria um objeto para armazenar as temperaturas mínimas e máximas por dia
+                var previsoesPorDia = {};
+
+                previsoes.forEach(previsao => {
+                    var dataHora = new Date(previsao.dt * 1000);
+                    var dia = dataHora.getDate();
+                    var hora = dataHora.getHours();
+                    var temperatura = previsao.main.temp;
+
+                    // Verifica se já existe um registro para esse dia
+                    if (!previsoesPorDia[dia]) {
+                        // Se não existir, inicializa as temperaturas mínima e máxima
+                        previsoesPorDia[dia] = {
+                            minima: temperatura,
+                            maxima: temperatura
+                        };
+                    } else {
+                        // Se já existir, atualiza as temperaturas mínima e máxima
+                        if (temperatura < previsoesPorDia[dia].minima) {
+                            previsoesPorDia[dia].minima = temperatura;
+                        }
+                        if (temperatura > previsoesPorDia[dia].maxima) {
+                            previsoesPorDia[dia].maxima = temperatura;
+                        }
+                    }
+                });
+
+                // Cria o HTML para exibir as previsões
+                var resultadoHTML = `<h2>Previsão do Tempo para os Próximos 5 Dias em ${data.city.name}</h2>`;
+                resultadoHTML += '<div class="previsoes-container">';
+
+                for (var dia in previsoesPorDia) {
+                    resultadoHTML += `
+                        <div class="previsao-item">
+                            <p><strong>Dia ${dia}</strong></p>
+                            <p><strong>Temperatura Mínima:</strong> ${previsoesPorDia[dia].minima} °C</p>
+                            <p><strong>Temperatura Máxima:</strong> ${previsoesPorDia[dia].maxima} °C</p>
+                        </div>
+                    `;
+                }
+
+                resultadoHTML += '</div>';
 
                 // Insere o resultado no elemento weather-result
                 document.getElementById('weather-result').innerHTML = resultadoHTML;
+                
             } else {
                 // Exibe uma mensagem de erro se a cidade não for encontrada ou outro erro ocorrer
                 document.getElementById('weather-result').innerHTML = `<p>Erro: ${data.message}</p>`;
